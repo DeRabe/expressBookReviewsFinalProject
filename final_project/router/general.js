@@ -25,10 +25,30 @@ public_users.post("/register", (req,res) => {
   return res.status(200).json({ message: "User successfully registered. Now you can login" });
 });
 
-// Get the book list available in the shop
-public_users.get('/', function (req, res) {
-  // Send the list of all books in a neat JSON format
-  res.status(200).send(JSON.stringify(books, null, 4));
+
+// Mock function to simulate asynchronous retrieval of books
+function getBooks() {
+  return new Promise((resolve, reject) => {
+    // Simulate a small delay
+    setTimeout(() => {
+      // Resolve the Promise with local 'books' data
+      resolve(books);
+    }, 300);
+  });
+}
+
+// Get the book list available in the shop (using async/await)
+public_users.get('/', async function (req, res) {
+  try {
+    // Await the asynchronous "getBooks" call
+    const fetchedBooks = await getBooks();
+
+    // Send the list of all books in a neat JSON format
+    return res.status(200).send(JSON.stringify(fetchedBooks, null, 4));
+  } catch (error) {
+    // If any error occurs during the process, respond with status 500
+    return res.status(500).json({ message: "Error fetching books" });
+  }
 });
 
 // Get book details based on ISBN
