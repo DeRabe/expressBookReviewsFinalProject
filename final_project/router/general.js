@@ -106,30 +106,33 @@ public_users.get('/author/:author', async function (req, res) {
   }
 });
 
-// Get all books based on title
-public_users.get('/title/:title', function (req, res) {
-  // Retrieve the title parameter from the request
-  const titleParam = req.params.title;
+// Simulated async function to get books by title
+function getBooksByTitle(title) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      let matchingBooks = [];
+      for (let isbn in books) {
+        if (books[isbn].title === title) {
+          matchingBooks.push(books[isbn]);
+        }
+      }
+      if (matchingBooks.length > 0) {
+        resolve(matchingBooks);
+      } else {
+        reject("No books found with that title");
+      }
+    }, 1000);
+  });
+}
 
-  // Create an array to store matched books
-  let matchingBooks = [];
-
-  // Iterate through all book keys in the 'books' object
-  for (let isbn in books) {
-    let book = books[isbn];
-
-    // Check if the book's title matches the title parameter
-    if (book.title === titleParam) {
-      matchingBooks.push(book);
-    }
-  }
-
-  // If we found matches, return them in neat JSON format
-  if (matchingBooks.length > 0) {
-    res.status(200).send(JSON.stringify(matchingBooks, null, 4));
-  } else {
-    // If no matches found, return a 404 error
-    res.status(404).json({ message: "No books found with that title" });
+/// Get all books based on Title (Async/Await + Promise)
+public_users.get('/title/:title', async function (req, res) {
+  try {
+    const titleParam = req.params.title;
+    const matchingBooks = await getBooksByTitle(titleParam);
+    return res.status(200).send(JSON.stringify(matchingBooks, null, 4));
+  } catch (error) {
+    return res.status(404).json({ message: error });
   }
 });
 
