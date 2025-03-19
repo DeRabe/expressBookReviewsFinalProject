@@ -91,6 +91,36 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   });
 });
 
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  // Retrieve the ISBN from the request parameters
+  const isbn = req.params.isbn;
+
+  // Get the username from the session
+  const username = req.session.authorization.username;
+
+  // Find the book by ISBN in the 'books' object
+  let book = books[isbn];
+
+  // If the book doesn't exist, return a 404
+  if (!book) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  // If the book has no reviews, or no review by this user, return a 404
+  if (!book.reviews || !book.reviews[username]) {
+    return res.status(404).json({ message: "No review by this user to delete" });
+  }
+
+  // Delete the user's review
+  delete book.reviews[username];
+
+  // Return the updated reviews
+  return res.status(200).json({
+    message: `Review by user '${username}' for ISBN ${isbn} has been deleted.`,
+    reviews: book.reviews
+  });
+});
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
@@ -98,4 +128,6 @@ module.exports.users = users;
 
 // curl --location --request POST 'http://localhost:5000/customer/login' --header 'Content-Type: application/json' --data-raw '{"username":"exampleUser","password":"examplePass"}'
 
-// curl --location --request PUT 'http://localhost:5000/customer/auth/review/1?review=This%20is%20an%20amazing%20book' --header 'Content-Type: application/json' --cookie 'connect.sid=s%3AFPoGZbkF7wUiFetEmND4fXusHg8rEG8o.kvfoBju%2FY0CbkWgqrYp5zpSVLp%2BfCERJh5o6n79%2Fkng'
+// curl --location --request PUT 'http://localhost:5000/customer/auth/review/1?review=This%20is%20an%20amazing%20book' --header 'Content-Type: application/json'
+
+// curl --location --request DELETE 'http://localhost:5000/customer/auth/review/1' --header 'Content-Type: application/json'
