@@ -75,30 +75,34 @@ public_users.get('/isbn/:isbn', async function (req, res) {
   }
 });
 
-// Get book details based on author
-public_users.get('/author/:author', function (req, res) {
-  // Retrieve the author parameter from the request
-  const authorParam = req.params.author;
+// Simulated async function to get books by author
+function getBooksByAuthor(author) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // Create an array to store matched books
+      let matchingBooks = [];
+      for (let isbn in books) {
+        if (books[isbn].author === author) {
+          matchingBooks.push(books[isbn]);
+        }
+      }
+      if (matchingBooks.length > 0) {
+        resolve(matchingBooks);
+      } else {
+        reject("No books found by that author");
+      }
+    }, 500);
+  });
+}
 
-  // Create an array to store matched books
-  let matchingBooks = [];
-
-  // Iterate through all book keys in the 'books' object
-  for (let isbn in books) {
-    let book = books[isbn];
-
-    // Check if the book's author matches the author parameter
-    if (book.author === authorParam) {
-      matchingBooks.push(book);
-    }
-  }
-
-  // If we found matches, return them in neat JSON format
-  if (matchingBooks.length > 0) {
-    res.status(200).send(JSON.stringify(matchingBooks, null, 4));
-  } else {
-    // If no matches found, return a 404 error
-    res.status(404).json({ message: "No books found by that author" });
+// Get book details based on Author (Async/Await + Promise)
+public_users.get('/author/:author', async function (req, res) {
+  try {
+    const authorParam = req.params.author;
+    const matchingBooks = await getBooksByAuthor(authorParam);
+    return res.status(200).send(JSON.stringify(matchingBooks, null, 4));
+  } catch (error) {
+    return res.status(404).json({ message: error });
   }
 });
 
