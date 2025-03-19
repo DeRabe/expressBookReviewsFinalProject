@@ -132,3 +132,5 @@ module.exports.general = public_users;
 // curl --location 'http://localhost:5000/title/Things%20Fall%20Apart'
 
 // curl --location 'http://localhost:5000/review/1'
+
+// curl --location --request POST 'http://localhost:5000/register' --header 'Content-Type: application/json' --data-raw '{"username":"exampleUser","password":"examplePass"}'
